@@ -7,7 +7,7 @@ init({tcp, http}, Req, _Opts) ->
 
 handle(Req, State) ->
     Body = <<"<h1>404</h1>">>,
-    {ok, Req2} = cowboy_http_req:reply(404, [], Body, Req),
+    {ok, Req2} = cowboy_req:reply(404, [], Body, Req),
     {ok, Req2, State}.
 
 terminate(_Req, _State) ->

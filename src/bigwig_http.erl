@@ -21,20 +21,23 @@ start_link() ->
 
 dispatch_rules() ->
     %% {Host, list({Path, Handler, Opts})}
-    [{'_', [
-
-            {[],                       bigwig_http_static, [<<"html">>,<<"index.html">>]}
-        ,   {[<<"static">>, '...'],     bigwig_http_static, []}
-        ,   {[<<"vm">>],                bigwig_http_vm, []}
-        ,   {[<<"rb">>, <<"stream">>],  bigwig_http_rb_stream, []}
-        ,   {[<<"rb">>, '...'],         bigwig_http_rb, []}
-        ,   {[<<"pid">>, '...'],        bigwig_http_pid, []}
-        ,   {[<<"module">>, '...'],     bigwig_http_module, []}
-        ,   {[<<"top">>, '...'],        bigwig_http_etop2, []}
-        ,   {[<<"appmon">>, '...'],     bigwig_http_appmon, []}
-        ,   {[<<"stats-stream">>],      bigwig_http_stats_stream, []}
-        ,   {'_',                       bigwig_http_catchall, []}
-    ]}].
+    cowboy_router:compile([
+        {'_', 
+            [
+                 {"/",                 bigwig_http_static, [<<"html">>,<<"index.html">>]}
+                ,{"/static/[...]",     cowboy_static, {priv_dir, bigwig, "",[{mimetypes, cow_mimetypes, all}]}}
+                ,{"/vm",               bigwig_http_vm, []}
+                ,{"/rb/stream",        bigwig_http_rb_stream, []}
+                ,{"/rb/[...]",         bigwig_http_rb, []}
+                ,{"/pid/[...]",        bigwig_http_pid, []}
+                ,{"/module/[...]",     bigwig_http_module, []}
+                ,{"/top/[...]",        bigwig_http_etop2, []}
+                ,{"/appmon/[...]",     bigwig_http_appmon, []}
+                ,{"/stats-stream",     bigwig_http_stats_stream, []}
+                ,{'_',                bigwig_http_catchall, []}
+            ]
+    }])
+    .
 
 confval(Key, Default) ->
     case application:get_env(Key) of
@@ -43,17 +46,19 @@ confval(Key, Default) ->
     end.
 
 init([]) ->
-    Port            = confval(port, 40829),
+    Port            = confval(port, 4082),
     Ip              = confval(ip, "127.0.0.1"),
     NumAcceptors    = confval(num_acceptors, 16),
 
     IpStr = case is_list(Ip) of true -> Ip; false -> inet_parse:ntoa(Ip) end,
     error_logger:info_msg("Bigwig listening on http://~s:~B/~n", [IpStr,Port]),
     %%
-    %% Name, NbAcceptors, Transport, TransOpts, Protocol, ProtoOpts
-    cowboy:start_listener(http, NumAcceptors,
-        cowboy_tcp_transport, [{port, Port}],
-        cowboy_http_protocol, [{dispatch, dispatch_rules()}]
+    %% Name, NbAcceptors, TransOpts, ProtoOpts
+    cowboy:start_http(http, NumAcceptors,
+        [{port, Port}],
+        [
+            {env, [{dispatch, dispatch_rules()}]}
+        ]    
     ),
 
     {ok, #state{}}.
