@@ -24,7 +24,7 @@ dispatch_rules() ->
     cowboy_router:compile([
         {'_', 
             [
-                 {"/[...]",                 cowboy_static, {priv_dir, bigwig, "html/index.html",[{mimetypes, cow_mimetypes, all}]}}
+                 {"/",                 cowboy_static, {priv_file, bigwig, "html/index.html",[{mimetypes, cow_mimetypes, all}]}}
                 ,{"/static/[...]",     cowboy_static, {priv_dir, bigwig, "",[{mimetypes, cow_mimetypes, all}]}}
                 ,{"/vm",               bigwig_http_vm, []}
                 ,{"/rb/stream",        bigwig_http_rb_stream, []}

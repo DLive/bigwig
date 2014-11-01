@@ -3,25 +3,25 @@
 %%
 -module(bigwig_http_pid).
 -behaviour(cowboy_http_handler).
--export([init/3, handle/2, terminate/2]).
+-export([init/3, handle/2, terminate/3]).
 
 init({tcp, http}, Req, _Opts) ->
     {ok, Req, undefined_state}.
 
 handle(Req0, State) ->
-    {Path, Req} = cowboy_req:path(Req0),
+    {Path, Req} = cowboy_req:path_info(Req0),
     {Method, Req1} = cowboy_req:method(Req),
     handle_path(Method, Path, Req1, State).
 
-handle_path('GET', [<<"pid">>, <<"global">>, Name], Req, State) ->
+handle_path(<<"GET">>, [<<"global">>, Name], Req, State) ->
     handle_get_pid(fun to_global_pid/1, Name, Req, State);
-handle_path('GET', [<<"pid">>, Pid], Req, State) ->
+handle_path(<<"GET">>, [Pid], Req, State) ->
     handle_get_pid(fun to_pid/1, Pid, Req, State);
-handle_path('POST', [<<"pid">>, <<"global">>, Name], Req, State) ->
+handle_path(<<"POST">>, [<<"global">>, Name], Req, State) ->
     handle_post_pid(fun to_global_pid/1, Name, Req, State);
-handle_path('POST', [<<"pid">>, Pid], Req, State) ->
+handle_path(<<"POST">>, [Pid], Req, State) ->
     handle_post_pid(fun to_pid/1, Pid, Req, State);
-handle_path('DELETE', [<<"pid">>, Pid], Req, State) ->
+handle_path(<<"DELETE">>, [Pid], Req, State) ->
     handle_delete_pid(fun to_pid/1, Pid, Req, State);
 handle_path(_, _, Req, State) ->
     not_found(Req, State).
@@ -30,8 +30,9 @@ not_found(Req, State) ->
     {ok, Req2} = cowboy_req:reply(404, [], <<"<h1>404</h1>">>, Req),
     {ok, Req2, State}.
 
-terminate(_Req, _State) ->
-    ok.
+terminate(_Reason, _Req, _State) ->
+  ok.
+
 
 handle_get_pid(Get, Pid0, Req, State) ->
     case catch(Get(Pid0)) of

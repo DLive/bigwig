@@ -245,7 +245,6 @@ handle_args([], C) ->
   C.
 
 loadinfo(SysI) ->
-  % io:format("loadinfo:~w",[SysI]),
   % #etop_info{n_procs = Procs,
   %            run_queue = RQ,
   %            now = Now,

@@ -40,7 +40,6 @@ websocket_info({websocket, Msg}, Req, State) ->
   {reply, {text, << "You said: ", Msg/binary >>}, Req, State};
 
 websocket_info(Msg, Req, State) ->
-  io:format("Unknown msg to ~p ~p~n", [?MODULE, Msg]),
   {ok, Req, State}.
 
 websocket_handle(_Msg, Req, State) ->
