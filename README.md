@@ -45,6 +45,10 @@ then run your project:
 NOTES
 =====
 
+临时注释CPU负载算法
+----------------
+暂时注释CPU负载算法，需要考虑多核
+
 Erlang topology
 ---------------
 Run Bigwig as a hidden node, on a distinct VM, and it will connect to nodes of
