@@ -15,10 +15,12 @@ init({tcp, http}, Req, OnlyFile) ->
   {ok, Req, OnlyFile}.
 
 handle(Req, undefined_state = State) ->
+  io:format("static undefined_state~n"),
   {Path, Req2} = cowboy_req:path(Req), % strip <<"static">>
   send(Req2, Path, State);
 
 handle(Req, OnlyFile = State) ->
+  io:format("static OnlyFile~n"),
   send(Req, OnlyFile, State).
 
 send(Req, PathBins, State) when is_binary(PathBins) ->
@@ -32,7 +34,8 @@ send(Req, PathBins, State) ->
       Headers = [{<<"Content-Type">>, <<"text/html">>}],
       {ok, Req2} = cowboy_req:reply(200, Headers, Body, Req),
       {ok, Req2, State};
-    _ ->
+    _Unkonow ->
+      io:format("static send :~p~n",[_Unkonow]),
       {ok, Req2} = cowboy_req:reply(404, [], <<"404'd">>, Req),
       {ok, Req2, State}
   end.
